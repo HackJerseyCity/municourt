@@ -5,6 +5,36 @@ import (
 	"strings"
 )
 
+// joinClippedText joins text items that may have been split by PDF clipping
+// paths. When a text line overflows its column, the PDF generator clips the
+// overflow into a separate BT/ET block. This produces single-character items
+// that are fragments of the previous (or next) word and should be concatenated
+// directly without a space.
+func joinClippedText(items []string) string {
+	if len(items) == 0 {
+		return ""
+	}
+	if len(items) == 1 {
+		return items[0]
+	}
+	var b strings.Builder
+	b.WriteString(items[0])
+	for i := 1; i < len(items); i++ {
+		cur := items[i]
+		prev := items[i-1]
+		// A single character is always a clipping fragment — concat without space.
+		// Also handle the case where the PREVIOUS item is a single character
+		// (e.g., "V" + "ENTNOR CITY" → "VENTNOR CITY").
+		if len(cur) == 1 || len(prev) == 1 {
+			b.WriteString(cur)
+		} else {
+			b.WriteByte(' ')
+			b.WriteString(cur)
+		}
+	}
+	return b.String()
+}
+
 // knownSections lists section names in the order they appear on each page.
 var knownSections = []string{
 	"Filings",
@@ -203,7 +233,7 @@ func ParsePage(items []string) (MunicipalityStats, error) {
 	if err != nil {
 		return stats, fmt.Errorf("reading title: %w", err)
 	}
-	title := strings.Join(titleLine, " ")
+	title := joinClippedText(titleLine)
 	if !strings.Contains(title, "MUNICIPAL COURT") {
 		return stats, fmt.Errorf("expected title containing 'MUNICIPAL COURT', got %q", title)
 	}
@@ -212,19 +242,19 @@ func ParsePage(items []string) (MunicipalityStats, error) {
 	if err != nil {
 		return stats, fmt.Errorf("reading date range: %w", err)
 	}
-	stats.DateRange = strings.Join(dateLine, " ")
+	stats.DateRange = joinClippedText(dateLine)
 
 	countyLine, err := nextLine()
 	if err != nil {
 		return stats, fmt.Errorf("reading county: %w", err)
 	}
-	stats.County = strings.Join(countyLine, " ")
+	stats.County = joinClippedText(countyLine)
 
 	muniLine, err := nextLine()
 	if err != nil {
 		return stats, fmt.Errorf("reading municipality: %w", err)
 	}
-	stats.Municipality = strings.Join(muniLine, " ")
+	stats.Municipality = joinClippedText(muniLine)
 
 	// Skip column header lines until we find a section name line.
 	for pos < len(lines) {

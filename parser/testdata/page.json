@@ -1,0 +1,275 @@
+[
+  {
+    "county": "ATLANTIC",
+    "municipality": "ABSECON",
+    "dateRange": "JULY 2023 - JUNE 2024",
+    "filings": {
+      "priorPeriod": {
+        "label": "Jul 2022 - Jun 2023",
+        "indictables": "434",
+        "dpAndPdp": "385",
+        "otherCriminal": "77",
+        "criminalTotal": "896",
+        "dwi": "33",
+        "trafficMoving": "2,339",
+        "parking": "56",
+        "trafficTotal": "2,428",
+        "grandTotal": "3,324"
+      },
+      "currentPeriod": {
+        "label": "Jul 2023 - Jun 2024",
+        "indictables": "232",
+        "dpAndPdp": "395",
+        "otherCriminal": "97",
+        "criminalTotal": "724",
+        "dwi": "37",
+        "trafficMoving": "2,527",
+        "parking": "26",
+        "trafficTotal": "2,590",
+        "grandTotal": "3,314"
+      },
+      "pctChange": {
+        "label": "% Change",
+        "indictables": "-47%",
+        "dpAndPdp": "3%",
+        "otherCriminal": "26%",
+        "criminalTotal": "-19%",
+        "dwi": "12%",
+        "trafficMoving": "8%",
+        "parking": "-54%",
+        "trafficTotal": "7%",
+        "grandTotal": "0%"
+      }
+    },
+    "resolutions": {
+      "priorPeriod": {
+        "label": "Jul 2022 - Jun 2023",
+        "indictables": "439",
+        "dpAndPdp": "387",
+        "otherCriminal": "80",
+        "criminalTotal": "906",
+        "dwi": "38",
+        "trafficMoving": "2,219",
+        "parking": "94",
+        "trafficTotal": "2,351",
+        "grandTotal": "3,257"
+      },
+      "currentPeriod": {
+        "label": "Jul 2023 - Jun 2024",
+        "indictables": "233",
+        "dpAndPdp": "339",
+        "otherCriminal": "107",
+        "criminalTotal": "679",
+        "dwi": "29",
+        "trafficMoving": "2,325",
+        "parking": "61",
+        "trafficTotal": "2,415",
+        "grandTotal": "3,094"
+      },
+      "pctChange": {
+        "label": "% Change",
+        "indictables": "-47%",
+        "dpAndPdp": "-12%",
+        "otherCriminal": "34%",
+        "criminalTotal": "-25%",
+        "dwi": "-24%",
+        "trafficMoving": "5%",
+        "parking": "-35%",
+        "trafficTotal": "3%",
+        "grandTotal": "-5%"
+      }
+    },
+    "clearance": {
+      "priorPeriod": {
+        "label": "Jul 2022 - Jun 2023",
+        "indictables": "5",
+        "dpAndPdp": "2",
+        "otherCriminal": "3",
+        "criminalTotal": "10",
+        "dwi": "5",
+        "trafficMoving": "-120",
+        "parking": "38",
+        "trafficTotal": "-77",
+        "grandTotal": "-67"
+      },
+      "currentPeriod": {
+        "label": "Jul 2023 - Jun 2024",
+        "indictables": "1",
+        "dpAndPdp": "-56",
+        "otherCriminal": "10",
+        "criminalTotal": "-45",
+        "dwi": "-8",
+        "trafficMoving": "-202",
+        "parking": "35",
+        "trafficTotal": "-175",
+        "grandTotal": "-220"
+      }
+    },
+    "clearancePercent": {
+      "priorPeriod": {
+        "label": "Jul 2022 - Jun 2023",
+        "indictables": "101%",
+        "dpAndPdp": "101%",
+        "otherCriminal": "104%",
+        "criminalTotal": "101%",
+        "dwi": "115%",
+        "trafficMoving": "95%",
+        "parking": "168%",
+        "trafficTotal": "97%",
+        "grandTotal": "98%"
+      },
+      "currentPeriod": {
+        "label": "Jul 2023 - Jun 2024",
+        "indictables": "100%",
+        "dpAndPdp": "86%",
+        "otherCriminal": "110%",
+        "criminalTotal": "94%",
+        "dwi": "78%",
+        "trafficMoving": "92%",
+        "parking": "235%",
+        "trafficTotal": "93%",
+        "grandTotal": "93%"
+      }
+    },
+    "backlog": {
+      "priorPeriod": {
+        "label": "Jun 2023",
+        "indictables": "0",
+        "dpAndPdp": "88",
+        "otherCriminal": "23",
+        "criminalTotal": "111",
+        "dwi": "10",
+        "trafficMoving": "170",
+        "parking": "27",
+        "trafficTotal": "207",
+        "grandTotal": "318"
+      },
+      "currentPeriod": {
+        "label": "Jun 2024",
+        "indictables": "0",
+        "dpAndPdp": "68",
+        "otherCriminal": "9",
+        "criminalTotal": "77",
+        "dwi": "10",
+        "trafficMoving": "225",
+        "parking": "2",
+        "trafficTotal": "237",
+        "grandTotal": "314"
+      },
+      "pctChange": {
+        "label": "% Change",
+        "indictables": "- -",
+        "dpAndPdp": "-23%",
+        "otherCriminal": "-61%",
+        "criminalTotal": "-31%",
+        "dwi": "0%",
+        "trafficMoving": "32%",
+        "parking": "-93%",
+        "trafficTotal": "14%",
+        "grandTotal": "-1%"
+      }
+    },
+    "backlogPer100MthlyFilings": {
+      "priorPeriod": {
+        "label": "Jun 2023",
+        "indictables": "0",
+        "dpAndPdp": "274",
+        "otherCriminal": "358",
+        "criminalTotal": "149",
+        "dwi": "364",
+        "trafficMoving": "87",
+        "parking": "579",
+        "trafficTotal": "102",
+        "grandTotal": "115"
+      },
+      "currentPeriod": {
+        "label": "Jun 2024",
+        "indictables": "0",
+        "dpAndPdp": "207",
+        "otherCriminal": "111",
+        "criminalTotal": "128",
+        "dwi": "324",
+        "trafficMoving": "107",
+        "parking": "92",
+        "trafficTotal": "110",
+        "grandTotal": "114"
+      },
+      "pctChange": {
+        "label": "% Change",
+        "indictables": "- -",
+        "dpAndPdp": "-25%",
+        "otherCriminal": "-69%",
+        "criminalTotal": "-14%",
+        "dwi": "-11%",
+        "trafficMoving": "23%",
+        "parking": "-84%",
+        "trafficTotal": "7%",
+        "grandTotal": "-1%"
+      }
+    },
+    "backlogPercent": {
+      "priorPeriod": {
+        "label": "Jun 2023",
+        "indictables": "0%",
+        "dpAndPdp": "77%",
+        "otherCriminal": "64%",
+        "criminalTotal": "74%",
+        "dwi": "100%",
+        "trafficMoving": "39%",
+        "parking": "68%",
+        "trafficTotal": "43%",
+        "grandTotal": "50%"
+      },
+      "currentPeriod": {
+        "label": "Jun 2024",
+        "indictables": "0%",
+        "dpAndPdp": "71%",
+        "otherCriminal": "36%",
+        "criminalTotal": "64%",
+        "dwi": "53%",
+        "trafficMoving": "36%",
+        "parking": "29%",
+        "trafficTotal": "36%",
+        "grandTotal": "40%"
+      }
+    },
+    "activePending": {
+      "priorPeriod": {
+        "label": "Jun 2023",
+        "indictables": "0",
+        "dpAndPdp": "115",
+        "otherCriminal": "36",
+        "criminalTotal": "151",
+        "dwi": "10",
+        "trafficMoving": "437",
+        "parking": "40",
+        "trafficTotal": "487",
+        "grandTotal": "638"
+      },
+      "currentPeriod": {
+        "label": "Jun 2024",
+        "indictables": "0",
+        "dpAndPdp": "96",
+        "otherCriminal": "25",
+        "criminalTotal": "121",
+        "dwi": "19",
+        "trafficMoving": "630",
+        "parking": "7",
+        "trafficTotal": "656",
+        "grandTotal": "777"
+      },
+      "pctChange": {
+        "label": "% Change",
+        "indictables": "- -",
+        "dpAndPdp": "-17%",
+        "otherCriminal": "-31%",
+        "criminalTotal": "-20%",
+        "dwi": "90%",
+        "trafficMoving": "44%",
+        "parking": "-83%",
+        "trafficTotal": "35%",
+        "grandTotal": "22%"
+      }
+    }
+  }
+]

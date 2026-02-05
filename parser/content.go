@@ -20,6 +20,14 @@ func ExtractTextItems(page PageData) []string {
 	var tc float64     // current Tc (character spacing) in text space units
 	var curFont string // current font name from Tf operator
 
+	// Text matrix tracking for smart Tm line-break detection.
+	// linePos = a*f - b*e is the perpendicular distance from the text
+	// baseline origin, handling both non-rotated and rotated matrices.
+	// det = a*d - b*c is used to update linePos on TD/Td operations.
+	var curLinePos float64 // current line position (updated by Tm and TD)
+	var curDet float64     // determinant of text matrix 2x2 part
+	hasPos := false        // whether we've established a line position
+
 	for i := 0; i < len(tokens); i++ {
 		t := tokens[i]
 		switch t.kind {
@@ -73,12 +81,51 @@ func ExtractTextItems(page PageData) []string {
 					if err == nil && ty != 0 {
 						items = append(items, "")
 					}
+					// Update current line position: linePos += ty * det
+					if err == nil && hasPos {
+						curLinePos += ty * curDet
+					}
 				}
 				stack = stack[:0]
 
 			case "Tm":
-				// Text matrix — always starts a new positioned block.
-				items = append(items, "")
+				// Text matrix — 6 operands: a b c d e f.
+				// Only insert a line break when the line position changes.
+				// linePos = a*f - b*e gives the perpendicular distance
+				// from the text baseline, handling both non-rotated and
+				// rotated matrices. We normalize the difference by the
+				// text scale (sqrt(a²+b²)) to get page-space units,
+				// then use a threshold of 5 units (well under a line
+				// height but tolerant of clipping-path repositioning).
+				inserted := false
+				if len(stack) >= 6 {
+					a, _ := strconv.ParseFloat(stack[len(stack)-6].value, 64)
+					b, _ := strconv.ParseFloat(stack[len(stack)-5].value, 64)
+					c, _ := strconv.ParseFloat(stack[len(stack)-4].value, 64)
+					d, _ := strconv.ParseFloat(stack[len(stack)-3].value, 64)
+					e, _ := strconv.ParseFloat(stack[len(stack)-2].value, 64)
+					f, _ := strconv.ParseFloat(stack[len(stack)-1].value, 64)
+					linePos := a*f - b*e
+					if hasPos {
+						scale := math.Sqrt(a*a + b*b)
+						diff := math.Abs(linePos - curLinePos)
+						if scale > 0 && diff/scale <= 5.0 {
+							// Same line — no break.
+						} else {
+							items = append(items, "")
+							inserted = true
+						}
+					} else {
+						items = append(items, "")
+						inserted = true
+					}
+					curDet = a*d - b*c
+					curLinePos = linePos
+					hasPos = true
+				}
+				if !inserted && !hasPos {
+					items = append(items, "")
+				}
 				stack = stack[:0]
 
 			case "Tc":
