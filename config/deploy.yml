@@ -1,0 +1,22 @@
+service: municourt
+image: aosik/municourt
+
+servers:
+  web:
+    - 46.225.94.252
+
+proxy:
+  ssl: true
+  host: municourt.postai.gallery
+  app_port: 8080
+
+registry:
+  username: aosik
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+volumes:
+  - "municourt_data:/data"
+
+builder:
+  arch: amd64
