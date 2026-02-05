@@ -20,6 +20,8 @@ func main() {
 		cmd.Download(os.Args[2:])
 	case "viz":
 		cmd.Viz(os.Args[2:])
+	case "web":
+		cmd.Web(os.Args[2:])
 	default:
 		usage()
 		os.Exit(1)
@@ -27,5 +29,5 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: municourt <command>\n\nCommands:\n  parse      Parse municipal court PDF statistics\n  download   Download municipal court PDFs from njcourts.gov\n  viz        Visualize statistics over time in the terminal\n")
+	fmt.Fprintf(os.Stderr, "Usage: municourt <command>\n\nCommands:\n  parse      Parse municipal court PDF statistics\n  download   Download municipal court PDFs from njcourts.gov\n  viz        Visualize statistics over time in the terminal\n  web        Start interactive web dashboard\n")
 }

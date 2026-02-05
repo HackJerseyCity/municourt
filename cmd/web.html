@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Municipal Court Statistics</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #333; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 24px;
+    background: #fff; border-bottom: 1px solid #ddd; align-items: flex-end;
+  }
+  .controls label { font-size: 13px; font-weight: 600; color: #555; }
+  .controls select, .controls button {
+    padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: #fff;
+  }
+  .controls button {
+    cursor: pointer; background: #4a90d9; color: #fff; border-color: #4a90d9; font-weight: 600;
+  }
+  .controls button:hover { background: #3a7bc8; }
+  .control-group { display: flex; flex-direction: column; gap: 4px; }
+  .hidden { display: none !important; }
+
+  h1 { font-size: 16px; font-weight: 600; margin-right: auto; }
+
+  .chips-bar {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 24px;
+    background: #fff; border-bottom: 1px solid #ddd; min-height: 40px; align-items: center;
+  }
+  .chips-bar:empty { display: none; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 16px; font-size: 13px; font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .chip--state   { background: #dbeafe; color: #1e40af; border-color: #93bbfd; }
+  .chip--county  { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+  .chip--municipality { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+  .chip .remove {
+    cursor: pointer; margin-left: 2px; font-size: 15px; line-height: 1;
+    opacity: 0.6; font-weight: 700;
+  }
+  .chip .remove:hover { opacity: 1; }
+
+  #chart { width: 100%; height: calc(100vh - 140px); }
+</style>
+</head>
+<body>
+
+<!-- Row 1: Global controls -->
+<div class="controls">
+  <h1>Municipal Court Statistics</h1>
+  <div class="control-group">
+    <label for="metric">Metric</label>
+    <select id="metric"></select>
+  </div>
+  <div class="control-group">
+    <label for="type">Case Type</label>
+    <select id="type"></select>
+  </div>
+  <div style="border-left:1px solid #ddd; height:40px; margin:0 4px;"></div>
+  <div class="control-group">
+    <label for="add-level">Level</label>
+    <select id="add-level">
+      <option value="state">State</option>
+      <option value="county">County</option>
+      <option value="municipality">Municipality</option>
+    </select>
+  </div>
+  <div class="control-group hidden" id="add-county-group">
+    <label for="add-county">County</label>
+    <select id="add-county"></select>
+  </div>
+  <div class="control-group hidden" id="add-muni-group">
+    <label for="add-muni">Municipality</label>
+    <select id="add-muni"></select>
+  </div>
+  <button id="add-btn">Add</button>
+</div>
+
+<!-- Row 2: Entity chips -->
+<div class="chips-bar" id="chips"></div>
+
+<!-- Chart -->
+<div id="chart"></div>
+
+<script>
+const chart = echarts.init(document.getElementById('chart'));
+window.addEventListener('resize', () => chart.resize());
+
+let meta = null;
+
+// Selected entities: array of { level, county, municipality, label, key }
+let entities = [];
+
+const selMetric = document.getElementById('metric');
+const selType = document.getElementById('type');
+const selAddLevel = document.getElementById('add-level');
+const selAddCounty = document.getElementById('add-county');
+const selAddMuni = document.getElementById('add-muni');
+const addCountyGroup = document.getElementById('add-county-group');
+const addMuniGroup = document.getElementById('add-muni-group');
+const addBtn = document.getElementById('add-btn');
+const chipsEl = document.getElementById('chips');
+
+function populateSelect(sel, options) {
+  sel.innerHTML = '';
+  for (const opt of options) {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    sel.appendChild(o);
+  }
+}
+
+function updateAdderVisibility() {
+  const level = selAddLevel.value;
+  if (level === 'state') {
+    addCountyGroup.classList.add('hidden');
+    addMuniGroup.classList.add('hidden');
+  } else if (level === 'county') {
+    addCountyGroup.classList.remove('hidden');
+    addMuniGroup.classList.add('hidden');
+    // Show "All Counties" option
+    populateAddCounty(true);
+  } else {
+    addCountyGroup.classList.remove('hidden');
+    addMuniGroup.classList.remove('hidden');
+    // No "All Counties" for municipality level — must pick one
+    populateAddCounty(false);
+    updateAddMunicipalities();
+  }
+}
+
+function populateAddCounty(includeAll) {
+  const opts = [];
+  if (includeAll) {
+    opts.push({ value: '__all__', label: 'All Counties' });
+  }
+  for (const c of meta.counties) {
+    opts.push({ value: c, label: c });
+  }
+  populateSelect(selAddCounty, opts);
+}
+
+function updateAddMunicipalities() {
+  const county = selAddCounty.value;
+  const munis = (county && meta.municipalities[county]) || [];
+  const opts = [{ value: '__all__', label: 'All Municipalities' }];
+  for (const m of munis) {
+    opts.push({ value: m, label: m });
+  }
+  populateSelect(selAddMuni, opts);
+}
+
+// Build a unique key for dedup
+function entityKey(level, county, municipality) {
+  if (level === 'state') return 'state::';
+  if (level === 'county') return 'county:' + county + ':';
+  return 'municipality:' + county + ':' + municipality;
+}
+
+function entityLabel(level, county, municipality) {
+  if (level === 'state') return 'STATEWIDE';
+  if (level === 'county') return county;
+  return municipality + ' (' + county + ')';
+}
+
+function addEntity(level, county, municipality) {
+  const key = entityKey(level, county, municipality);
+  if (entities.some(e => e.key === key)) return; // already added
+  const label = entityLabel(level, county, municipality);
+  entities.push({ level, county: county || '', municipality: municipality || '', label, key });
+  renderChips();
+  fetchAndRender();
+}
+
+function removeEntity(key) {
+  entities = entities.filter(e => e.key !== key);
+  renderChips();
+  fetchAndRender();
+}
+
+function renderChips() {
+  chipsEl.innerHTML = '';
+  for (const e of entities) {
+    const chip = document.createElement('span');
+    chip.className = 'chip chip--' + e.level;
+    chip.innerHTML = '<span class="label"></span><span class="remove" data-key="' +
+      e.key.replace(/"/g, '&quot;') + '">&times;</span>';
+    chip.querySelector('.label').textContent = e.label;
+    chipsEl.appendChild(chip);
+  }
+}
+
+// Event delegation for chip removal
+chipsEl.addEventListener('click', (ev) => {
+  const removeBtn = ev.target.closest('.remove');
+  if (removeBtn) {
+    removeEntity(removeBtn.dataset.key);
+  }
+});
+
+function handleAdd() {
+  const level = selAddLevel.value;
+  if (level === 'state') {
+    addEntity('state', '', '');
+  } else if (level === 'county') {
+    if (selAddCounty.value === '__all__') {
+      for (const c of meta.counties) {
+        addEntity('county', c, '');
+      }
+    } else {
+      addEntity('county', selAddCounty.value, '');
+    }
+  } else {
+    const county = selAddCounty.value;
+    if (selAddMuni.value === '__all__') {
+      const munis = meta.municipalities[county] || [];
+      for (const m of munis) {
+        addEntity('municipality', county, m);
+      }
+    } else {
+      addEntity('municipality', county, selAddMuni.value);
+    }
+  }
+}
+
+async function fetchAndRender() {
+  if (entities.length === 0) {
+    chart.setOption({
+      title: { text: 'Add an entity to begin', left: 'center', top: '40%', textStyle: { fontSize: 16, color: '#999' } },
+      xAxis: { show: false }, yAxis: { show: false }, series: [],
+    }, true);
+    return;
+  }
+
+  const metric = selMetric.value;
+  const type = selType.value;
+
+  // Fetch all entities in parallel
+  const fetches = entities.map(e => {
+    const params = new URLSearchParams({
+      level: e.level, metric, type,
+      county: e.county, municipality: e.municipality,
+    });
+    return fetch('/api/series?' + params).then(r => r.json());
+  });
+
+  let results;
+  try {
+    results = await Promise.all(fetches);
+  } catch (err) {
+    console.error('fetch error', err);
+    return;
+  }
+
+  // Merge dates from all responses
+  const dateSet = new Set();
+  for (const r of results) {
+    for (const d of r.dates) dateSet.add(d);
+  }
+  const mergedDates = Array.from(dateSet).sort();
+
+  // Build date->index map for the merged axis
+  const dateIndex = new Map();
+  mergedDates.forEach((d, i) => dateIndex.set(d, i));
+
+  // Build merged series
+  const allSeries = [];
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const e = entities[i];
+    // The API may return multiple series (e.g., state returns one "STATEWIDE" line,
+    // county with blank filter returns all counties). Use entity label as the series
+    // name for single-series results; for multi-series, prefix with entity label if needed.
+    for (const s of r.series) {
+      // Re-align values to merged date axis
+      const values = new Array(mergedDates.length).fill(null);
+      for (let j = 0; j < r.dates.length; j++) {
+        const idx = dateIndex.get(r.dates[j]);
+        if (idx !== undefined) values[idx] = s.values[j];
+      }
+      // Use the entity label as the name (more meaningful for mixed-level charts)
+      const name = r.series.length === 1 ? e.label : s.name;
+      allSeries.push({ name, values });
+    }
+  }
+
+  const title = metricLabel(metric) + ' \u2014 ' + typeLabel(type);
+
+  const option = {
+    title: { text: title, left: 'center', top: 10, textStyle: { fontSize: 16 } },
+    tooltip: { trigger: 'axis', confine: true },
+    legend: {
+      type: 'scroll',
+      bottom: 0,
+      textStyle: { fontSize: 12 },
+    },
+    grid: { left: 80, right: 40, top: 60, bottom: 60 },
+    xAxis: {
+      type: 'category',
+      data: mergedDates,
+      axisLabel: { rotate: 45 },
+    },
+    yAxis: { type: 'value', axisLabel: { formatter: v => v.toLocaleString() } },
+    dataZoom: [{ type: 'inside' }],
+    series: allSeries.map(s => ({
+      name: s.name,
+      type: 'line',
+      data: s.values,
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: 4,
+      emphasis: { focus: 'series' },
+      connectNulls: false,
+    })),
+  };
+
+  chart.setOption(option, true);
+}
+
+// Helpers to get display labels on the client side
+function metricLabel(m) {
+  if (!meta) return m;
+  const found = meta.metrics.find(x => x.value === m);
+  return found ? found.label : m;
+}
+function typeLabel(t) {
+  if (!meta) return t;
+  const found = meta.types.find(x => x.value === t);
+  return found ? found.label : t;
+}
+
+async function init() {
+  const resp = await fetch('/api/metadata');
+  meta = await resp.json();
+
+  populateSelect(selMetric, meta.metrics);
+  populateSelect(selType, meta.types);
+
+  updateAdderVisibility();
+
+  // Wire up adder controls
+  selAddLevel.addEventListener('change', updateAdderVisibility);
+  selAddCounty.addEventListener('change', () => {
+    if (selAddLevel.value === 'municipality') updateAddMunicipalities();
+  });
+  addBtn.addEventListener('click', handleAdd);
+
+  // Re-fetch when metric or type changes (applies to all entities)
+  selMetric.addEventListener('change', fetchAndRender);
+  selType.addEventListener('change', fetchAndRender);
+
+  // Pre-select STATEWIDE
+  addEntity('state', '', '');
+}
+
+init();
+</script>
+</body>
+</html>
