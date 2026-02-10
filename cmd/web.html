@@ -6,207 +6,400 @@
 <title>Municipal Court Statistics</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #333; }
+  :root {
+    /* Typographic scale — 1.25 ratio */
+    --text-xs: 0.6875rem;
+    --text-sm: 0.8125rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
 
-  .controls {
-    display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 24px;
-    background: #fff; border-bottom: 1px solid #ddd; align-items: flex-end;
-  }
-  .controls label { font-size: 13px; font-weight: 600; color: #555; }
-  .controls select, .controls button {
-    padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: #fff;
-  }
-  .controls button {
-    cursor: pointer; background: #4a90d9; color: #fff; border-color: #4a90d9; font-weight: 600;
-  }
-  .controls button:hover { background: #3a7bc8; }
-  .control-group { display: flex; flex-direction: column; gap: 4px; }
-  .hidden { display: none !important; }
+    /* Spatial scale — base 8 */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
 
-  .title-group { display: flex; align-items: center; gap: 8px; margin-right: auto; }
-  h1 { font-size: 16px; font-weight: 600; }
+    /* Neutral scale — warm gray */
+    --gray-50: #fafaf9;
+    --gray-100: #f5f5f4;
+    --gray-200: #e7e5e4;
+    --gray-300: #d6d3d1;
+    --gray-400: #a8a29e;
+    --gray-500: #78716c;
+    --gray-600: #57534e;
+    --gray-700: #44403c;
+    --gray-800: #292524;
+    --gray-900: #1c1917;
+
+    /* Surfaces */
+    --bg: #ffffff;
+    --border: var(--gray-200);
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 120ms;
+    --duration-normal: 200ms;
+
+    /* Depth */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+    --radius: 6px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .page { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    padding: var(--space-6) var(--space-8) var(--space-4);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  h1 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--gray-900);
+  }
+
   .info-btn {
-    width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #999;
-    background: none; cursor: pointer; font-size: 13px; font-style: italic;
-    font-family: Georgia, "Times New Roman", serif; color: #999; line-height: 1;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gray-400);
+    background: none; cursor: pointer;
+    font-size: 11px; font-style: italic;
+    font-family: Georgia, serif;
+    color: var(--gray-400);
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0; flex-shrink: 0;
+    transition: border-color var(--duration-fast) var(--ease-out),
+                color var(--duration-fast) var(--ease-out);
   }
-  .info-btn:hover { border-color: #4a90d9; color: #4a90d9; }
+  .info-btn:hover { border-color: var(--gray-900); color: var(--gray-900); }
+  .info-btn:focus-visible {
+    outline: 2px solid var(--gray-900);
+    outline-offset: 2px;
+  }
 
+  .download-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--gray-400); padding: var(--space-2);
+    border-radius: var(--radius);
+    display: inline-flex; align-items: center;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .download-btn:hover { color: var(--gray-900); }
+  .download-btn:focus-visible {
+    outline: 2px solid var(--gray-900);
+    outline-offset: 2px;
+  }
+  .download-btn svg { width: 18px; height: 18px; }
+
+  /* ── Controls ── */
+  .controls {
+    padding: 0 var(--space-8) var(--space-4);
+    display: flex; align-items: flex-end;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .control-group {
+    display: flex; flex-direction: column; gap: var(--space-1);
+  }
+
+  .control-group label {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .control-group select {
+    appearance: none; -webkit-appearance: none;
+    padding: 7px var(--space-8) 7px var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    color: var(--gray-900);
+    background: var(--bg)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 4l2.5 2.5L7.5 4' fill='none' stroke='%23a8a29e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 10px center;
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  .control-group select:hover { border-color: var(--gray-500); }
+  .control-group select:focus-visible {
+    outline: none;
+    border-color: var(--gray-900);
+  }
+
+  .controls .divider {
+    width: 1px; height: 28px;
+    background: var(--gray-200);
+    align-self: flex-end;
+    margin-bottom: 6px;
+  }
+
+  .add-btn {
+    padding: 7px var(--space-4);
+    border: 1px solid var(--gray-900);
+    border-radius: var(--radius);
+    background: var(--gray-900); color: #fff;
+    font-size: var(--text-sm); font-weight: 500;
+    font-family: inherit; cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out);
+  }
+  .add-btn:hover { background: var(--gray-700); border-color: var(--gray-700); }
+  .add-btn:focus-visible {
+    outline: 2px solid var(--gray-900);
+    outline-offset: 2px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* ── Chips ── */
   .chips-bar {
-    display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 24px;
-    background: #fff; border-bottom: 1px solid #ddd; min-height: 40px; align-items: center;
+    display: flex; flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0 var(--space-8) var(--space-3);
+    align-items: center;
   }
   .chips-bar:empty { display: none; }
+
   .chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: 16px; font-size: 13px; font-weight: 500;
-    border: 1px solid transparent;
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 3px var(--space-3);
+    border-radius: 999px;
+    font-size: var(--text-xs); font-weight: 500;
+    color: var(--gray-700);
+    background: var(--gray-100);
+    transition: background var(--duration-fast) var(--ease-out);
   }
-  .chip--state   { background: #dbeafe; color: #1e40af; border-color: #93bbfd; }
-  .chip--county  { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
-  .chip--municipality { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+
   .chip .remove {
-    cursor: pointer; margin-left: 2px; font-size: 15px; line-height: 1;
-    opacity: 0.6; font-weight: 700;
+    cursor: pointer; font-size: 13px; line-height: 1;
+    opacity: 0.35; font-weight: 600;
+    margin-left: 2px;
+    transition: opacity var(--duration-fast) var(--ease-out);
   }
   .chip .remove:hover { opacity: 1; }
+
   .clear-btn {
-    background: none; border: 1px solid #ccc; color: #666; cursor: pointer;
-    padding: 3px 10px; border-radius: 16px; font-size: 12px; font-weight: 500;
-    margin-left: auto; white-space: nowrap;
+    background: none; border: none;
+    color: var(--gray-400); cursor: pointer;
+    padding: 3px var(--space-2);
+    font-size: var(--text-xs); font-weight: 500;
+    font-family: inherit;
+    margin-left: auto;
+    transition: color var(--duration-fast) var(--ease-out);
   }
-  .clear-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+  .clear-btn:hover { color: var(--gray-900); }
 
-  .chart-actions {
-    display: flex; justify-content: flex-end; padding: 4px 24px 0;
-    background: #f5f5f5;
-  }
-  .download-btn {
-    background: none; border: 1px solid #ccc; color: #666; cursor: pointer;
-    padding: 4px 10px; border-radius: 4px; font-size: 12px;
-    display: inline-flex; align-items: center; gap: 4px;
-  }
-  .download-btn:hover { background: #fff; border-color: #4a90d9; color: #4a90d9; }
-  .download-btn svg { width: 14px; height: 14px; }
+  /* ── Chart ── */
+  .chart-wrap { flex: 1; padding: 0 var(--space-8) var(--space-4); }
+  #chart { width: 100%; height: calc(100vh - 210px); min-height: 300px; }
 
-  #chart { width: 100%; height: calc(100vh - 180px); min-height: 300px; }
-
+  /* ── Footer ── */
   footer {
-    text-align: center; padding: 12px 24px; font-size: 12px; color: #999;
-    background: #f5f5f5;
+    padding: var(--space-3) var(--space-8) var(--space-6);
+    text-align: center;
+    font-size: var(--text-xs); color: var(--gray-400);
   }
-  footer a { color: #666; text-decoration: none; }
-  footer a:hover { color: #4a90d9; text-decoration: underline; }
+  footer a {
+    color: var(--gray-400); text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  footer a:hover { color: var(--gray-900); }
 
-  /* Info modal */
+  /* ── Modal ── */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    z-index: 1000; align-items: center; justify-content: center;
+    display: none; position: fixed; inset: 0;
+    background: rgba(28,25,23,0.2);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center; justify-content: center;
   }
   .modal-overlay.open { display: flex; }
+
   .modal {
-    background: #fff; border-radius: 8px; max-width: 520px; width: 90%;
-    padding: 24px; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    background: var(--bg);
+    border-radius: calc(var(--radius) * 2);
+    max-width: 440px; width: 88%;
+    padding: var(--space-8);
+    position: relative;
+    box-shadow: var(--shadow-lg);
     max-height: 90vh; overflow-y: auto;
   }
-  .modal h2 { font-size: 18px; margin-bottom: 12px; }
-  .modal p { font-size: 14px; line-height: 1.6; color: #555; margin-bottom: 10px; }
-  .modal-close {
-    position: absolute; top: 12px; right: 16px; background: none; border: none;
-    font-size: 22px; cursor: pointer; color: #999; line-height: 1;
+  .modal h2 {
+    font-size: var(--text-lg); font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-4);
   }
-  .modal-close:hover { color: #333; }
+  .modal p {
+    font-size: var(--text-sm); line-height: 1.65;
+    color: var(--gray-600); margin-bottom: var(--space-3);
+  }
+  .modal p:last-of-type { margin-bottom: 0; }
+  .modal a {
+    color: var(--gray-900);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--gray-300);
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+  .modal a:hover { text-decoration-color: var(--gray-900); }
+  .modal-close {
+    position: absolute; top: var(--space-4); right: var(--space-4);
+    background: none; border: none;
+    font-size: 18px; cursor: pointer;
+    color: var(--gray-400); line-height: 1; padding: var(--space-1);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+  .modal-close:hover { color: var(--gray-900); }
 
-  /* Mobile responsive */
+  /* ── Responsive ── */
   @media (max-width: 768px) {
-    .controls { padding: 10px 12px; gap: 8px; }
-    .title-group { width: 100%; margin-right: 0; }
-    h1 { font-size: 15px; }
+    header { padding: var(--space-4) var(--space-4) var(--space-3); }
+    h1 { font-size: var(--text-lg); }
+    .controls { padding: 0 var(--space-4) var(--space-3); gap: var(--space-2); }
     .control-group { flex: 1; min-width: 0; }
     .control-group select { width: 100%; }
     .controls .divider { display: none; }
-    .chips-bar { padding: 8px 12px; }
-    .chart-actions { padding: 4px 12px 0; }
-    #chart { height: calc(100vh - 220px); min-height: 250px; }
-    footer { padding: 10px 12px; }
-    .modal { width: 95%; padding: 20px; }
+    .chips-bar { padding: 0 var(--space-4) var(--space-3); }
+    .chart-wrap { padding: 0 var(--space-4) var(--space-3); }
+    #chart { height: calc(100vh - 240px); }
+    footer { padding: var(--space-3) var(--space-4) var(--space-4); }
+    .modal { padding: var(--space-6); }
   }
+
   @media (max-width: 480px) {
-    .controls { padding: 8px 10px; gap: 6px; }
-    .control-group { flex-basis: calc(50% - 4px); }
-    #add-add-group { flex-basis: auto; }
-    #chart { height: calc(100vh - 260px); }
+    .controls { gap: var(--space-2); }
+    .control-group { flex-basis: calc(50% - var(--space-1)); }
+    #chart { height: calc(100vh - 280px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- Row 1: Global controls -->
-<div class="controls">
-  <div class="title-group">
-    <h1>Municipal Court Statistics</h1>
-    <button class="info-btn" id="info-btn" title="About this site">i</button>
+<div class="page">
+  <header>
+    <div class="header-left">
+      <h1>Municipal Court Statistics</h1>
+      <button class="info-btn" id="info-btn" title="About" aria-label="About this site">i</button>
+    </div>
+    <button class="download-btn" id="download-btn" title="Save as image" aria-label="Download chart as image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+  </header>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="metric">Metric</label>
+      <select id="metric"></select>
+    </div>
+    <div class="control-group">
+      <label for="type">Case Type</label>
+      <select id="type"></select>
+    </div>
+    <div class="divider"></div>
+    <div class="control-group">
+      <label for="add-level">Level</label>
+      <select id="add-level">
+        <option value="state">State</option>
+        <option value="county">County</option>
+        <option value="municipality">Municipality</option>
+      </select>
+    </div>
+    <div class="control-group hidden" id="add-county-group">
+      <label for="add-county">County</label>
+      <select id="add-county"></select>
+    </div>
+    <div class="control-group hidden" id="add-muni-group">
+      <label for="add-muni">Municipality</label>
+      <select id="add-muni"></select>
+    </div>
+    <button class="add-btn" id="add-btn">Add</button>
   </div>
-  <div class="control-group">
-    <label for="metric">Metric</label>
-    <select id="metric"></select>
+
+  <div class="chips-bar" id="chips"></div>
+
+  <div class="chart-wrap">
+    <div id="chart"></div>
   </div>
-  <div class="control-group">
-    <label for="type">Case Type</label>
-    <select id="type"></select>
-  </div>
-  <div class="divider" style="border-left:1px solid #ddd; height:40px; margin:0 4px;"></div>
-  <div class="control-group">
-    <label for="add-level">Level</label>
-    <select id="add-level">
-      <option value="state">State</option>
-      <option value="county">County</option>
-      <option value="municipality">Municipality</option>
-    </select>
-  </div>
-  <div class="control-group hidden" id="add-county-group">
-    <label for="add-county">County</label>
-    <select id="add-county"></select>
-  </div>
-  <div class="control-group hidden" id="add-muni-group">
-    <label for="add-muni">Municipality</label>
-    <select id="add-muni"></select>
-  </div>
-  <button id="add-btn">Add</button>
+
+  <footer>
+    <a href="https://github.com/hackJerseyCity/municourt" target="_blank" rel="noopener noreferrer">github.com/hackJerseyCity/municourt</a>
+  </footer>
 </div>
 
-<!-- Row 2: Entity chips -->
-<div class="chips-bar" id="chips"></div>
-
-<!-- Chart actions -->
-<div class="chart-actions">
-  <button class="download-btn" id="download-btn" title="Download chart as image">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Save Image
-  </button>
-</div>
-
-<!-- Chart -->
-<div id="chart"></div>
-
-<!-- Footer -->
-<footer>
-  <a href="https://github.com/hackJerseyCity/municourt" target="_blank" rel="noopener noreferrer">github.com/hackJerseyCity/municourt</a>
-</footer>
-
-<!-- Info modal -->
 <div class="modal-overlay" id="info-modal">
   <div class="modal">
-    <button class="modal-close" id="modal-close">&times;</button>
-    <h2>About This Site</h2>
+    <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    <h2>About</h2>
     <p>
-      This tool visualizes New Jersey municipal court statistics over time.
-      Data is sourced from the NJ Courts public reports and covers metrics
-      such as filings, resolutions, clearance rates, and case backlog across
-      all municipalities and counties in New Jersey.
+      Visualizes New Jersey municipal court statistics over time.
+      Data is sourced from NJ Courts public reports, covering filings,
+      resolutions, clearance rates, and case backlog across all
+      municipalities and counties.
     </p>
     <p>
-      Use the controls above to select a metric and case type, then add
-      state, county, or municipality-level entities to compare them on the
-      chart. You can add multiple entities to see trends side by side.
+      Select a metric and case type, then add entities at the state,
+      county, or municipality level to compare trends.
     </p>
     <p>
       Built by <a href="https://github.com/hackJerseyCity" target="_blank" rel="noopener noreferrer">Hack Jersey City</a>.
-      Source code available on <a href="https://github.com/hackJerseyCity/municourt" target="_blank" rel="noopener noreferrer">GitHub</a>.
+      Source on <a href="https://github.com/hackJerseyCity/municourt" target="_blank" rel="noopener noreferrer">GitHub</a>.
     </p>
   </div>
 </div>
 
 <script>
+/* ── Chart palette — restrained, distinguishable ── */
+const palette = [
+  '#2563eb', // Blue        (hue ≈220°)
+  '#ea580c', // Orange      (hue ≈ 25°)
+  '#16a34a', // Green       (hue ≈142°)
+  '#dc2626', // Red         (hue ≈  0°)
+  '#9333ea', // Purple      (hue ≈270°)
+  '#0891b2', // Cyan        (hue ≈190°)
+  '#ca8a04', // Gold        (hue ≈ 45°)
+  '#c026d3', // Fuchsia     (hue ≈300°)
+  '#65a30d', // Lime        (hue ≈ 85°)
+  '#475569', // Slate       (neutral anchor)
+];
+
 const chart = echarts.init(document.getElementById('chart'));
 window.addEventListener('resize', () => chart.resize());
 
 let meta = null;
-
-// Selected entities: array of { level, county, municipality, label, key }
 let entities = [];
 
 const selMetric = document.getElementById('metric');
@@ -241,12 +434,10 @@ function updateAdderVisibility() {
   } else if (level === 'county') {
     addCountyGroup.classList.remove('hidden');
     addMuniGroup.classList.add('hidden');
-    // Show "All Counties" option
     populateAddCounty(true);
   } else {
     addCountyGroup.classList.remove('hidden');
     addMuniGroup.classList.remove('hidden');
-    // No "All Counties" for municipality level — must pick one
     populateAddCounty(false);
     updateAddMunicipalities();
   }
@@ -254,12 +445,8 @@ function updateAdderVisibility() {
 
 function populateAddCounty(includeAll) {
   const opts = [];
-  if (includeAll) {
-    opts.push({ value: '__all__', label: 'All Counties' });
-  }
-  for (const c of meta.counties) {
-    opts.push({ value: c, label: c });
-  }
+  if (includeAll) opts.push({ value: '__all__', label: 'All Counties' });
+  for (const c of meta.counties) opts.push({ value: c, label: c });
   populateSelect(selAddCounty, opts);
 }
 
@@ -267,13 +454,10 @@ function updateAddMunicipalities() {
   const county = selAddCounty.value;
   const munis = (county && meta.municipalities[county]) || [];
   const opts = [{ value: '__all__', label: 'All Municipalities' }];
-  for (const m of munis) {
-    opts.push({ value: m, label: m });
-  }
+  for (const m of munis) opts.push({ value: m, label: m });
   populateSelect(selAddMuni, opts);
 }
 
-// Build a unique key for dedup
 function entityKey(level, county, municipality) {
   if (level === 'state') return 'state::';
   if (level === 'county') return 'county:' + county + ':';
@@ -288,7 +472,7 @@ function entityLabel(level, county, municipality) {
 
 function addEntity(level, county, municipality) {
   const key = entityKey(level, county, municipality);
-  if (entities.some(e => e.key === key)) return; // already added
+  if (entities.some(e => e.key === key)) return;
   const label = entityLabel(level, county, municipality);
   entities.push({ level, county: county || '', municipality: municipality || '', label, key });
   renderChips();
@@ -311,9 +495,9 @@ function renderChips() {
   chipsEl.innerHTML = '';
   for (const e of entities) {
     const chip = document.createElement('span');
-    chip.className = 'chip chip--' + e.level;
+    chip.className = 'chip';
     chip.innerHTML = '<span class="label"></span><span class="remove" data-key="' +
-      e.key.replace(/"/g, '&quot;') + '">&times;</span>';
+      e.key.replace(/"/g, '&quot;') + '">\u00d7</span>';
     chip.querySelector('.label').textContent = e.label;
     chipsEl.appendChild(chip);
   }
@@ -326,12 +510,9 @@ function renderChips() {
   }
 }
 
-// Event delegation for chip removal
 chipsEl.addEventListener('click', (ev) => {
   const removeBtn = ev.target.closest('.remove');
-  if (removeBtn) {
-    removeEntity(removeBtn.dataset.key);
-  }
+  if (removeBtn) removeEntity(removeBtn.dataset.key);
 });
 
 function handleAdd() {
@@ -340,9 +521,7 @@ function handleAdd() {
     addEntity('state', '', '');
   } else if (level === 'county') {
     if (selAddCounty.value === '__all__') {
-      for (const c of meta.counties) {
-        addEntity('county', c, '');
-      }
+      for (const c of meta.counties) addEntity('county', c, '');
     } else {
       addEntity('county', selAddCounty.value, '');
     }
@@ -350,9 +529,7 @@ function handleAdd() {
     const county = selAddCounty.value;
     if (selAddMuni.value === '__all__') {
       const munis = meta.municipalities[county] || [];
-      for (const m of munis) {
-        addEntity('municipality', county, m);
-      }
+      for (const m of munis) addEntity('municipality', county, m);
     } else {
       addEntity('municipality', county, selAddMuni.value);
     }
@@ -362,7 +539,12 @@ function handleAdd() {
 async function fetchAndRender() {
   if (entities.length === 0) {
     chart.setOption({
-      title: { text: 'Add an entity to begin', left: 'center', top: '40%', textStyle: { fontSize: 16, color: '#999' } },
+      title: {
+        text: 'Add an entity to begin',
+        left: 'center', top: '40%',
+        textStyle: { fontSize: 14, fontWeight: 400, color: '#a8a29e',
+          fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif' }
+      },
       xAxis: { show: false }, yAxis: { show: false }, series: [],
     }, true);
     return;
@@ -371,7 +553,6 @@ async function fetchAndRender() {
   const metric = selMetric.value;
   const type = selType.value;
 
-  // Fetch all entities in parallel
   const fetches = entities.map(e => {
     const params = new URLSearchParams({
       level: e.level, metric, type,
@@ -388,33 +569,23 @@ async function fetchAndRender() {
     return;
   }
 
-  // Merge dates from all responses
   const dateSet = new Set();
-  for (const r of results) {
-    for (const d of r.dates) dateSet.add(d);
-  }
+  for (const r of results) for (const d of r.dates) dateSet.add(d);
   const mergedDates = Array.from(dateSet).sort();
 
-  // Build date->index map for the merged axis
   const dateIndex = new Map();
   mergedDates.forEach((d, i) => dateIndex.set(d, i));
 
-  // Build merged series
   const allSeries = [];
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     const e = entities[i];
-    // The API may return multiple series (e.g., state returns one "STATEWIDE" line,
-    // county with blank filter returns all counties). Use entity label as the series
-    // name for single-series results; for multi-series, prefix with entity label if needed.
     for (const s of r.series) {
-      // Re-align values to merged date axis
       const values = new Array(mergedDates.length).fill(null);
       for (let j = 0; j < r.dates.length; j++) {
         const idx = dateIndex.get(r.dates[j]);
         if (idx !== undefined) values[idx] = s.values[j];
       }
-      // Use the entity label as the name (more meaningful for mixed-level charts)
       const name = r.series.length === 1 ? e.label : s.name;
       allSeries.push({ name, values });
     }
@@ -423,29 +594,59 @@ async function fetchAndRender() {
   const title = metricLabel(metric) + ' \u2014 ' + typeLabel(type);
 
   const option = {
-    title: { text: title, left: 'center', top: 10, textStyle: { fontSize: 16 } },
-    tooltip: { trigger: 'axis', confine: true },
+    color: palette,
+    title: {
+      text: title, left: 'center', top: 8,
+      textStyle: {
+        fontSize: 14, fontWeight: 600, color: '#1c1917',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+      }
+    },
+    tooltip: {
+      trigger: 'axis', confine: true,
+      backgroundColor: '#fff',
+      borderColor: '#e7e5e4',
+      borderWidth: 1,
+      textStyle: {
+        fontSize: 12, color: '#1c1917',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+      },
+      extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 6px;',
+    },
     legend: {
-      type: 'scroll',
-      bottom: 0,
-      textStyle: { fontSize: 12 },
+      type: 'scroll', bottom: 0,
+      textStyle: {
+        fontSize: 11, color: '#57534e',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+      },
+      pageIconColor: '#78716c',
+      pageIconInactiveColor: '#d6d3d1',
+      pageTextStyle: { color: '#78716c' },
+      itemWidth: 16, itemHeight: 2,
+      itemGap: 16,
     },
-    grid: { left: 80, right: 40, top: 60, bottom: 60 },
+    grid: { left: 72, right: 32, top: 48, bottom: 56 },
     xAxis: {
-      type: 'category',
-      data: mergedDates,
-      axisLabel: { rotate: 45 },
+      type: 'category', data: mergedDates,
+      axisLabel: { rotate: 45, fontSize: 10, color: '#78716c',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif' },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisTick: { lineStyle: { color: '#e7e5e4' } },
     },
-    yAxis: { type: 'value', axisLabel: { formatter: v => v.toLocaleString() } },
+    yAxis: {
+      type: 'value',
+      axisLabel: { formatter: v => v.toLocaleString(), fontSize: 10, color: '#78716c',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif' },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: '#f5f5f4' } },
+    },
     dataZoom: [{ type: 'inside' }],
     series: allSeries.map(s => ({
-      name: s.name,
-      type: 'line',
-      data: s.values,
-      smooth: false,
-      symbol: 'circle',
-      symbolSize: 4,
-      emphasis: { focus: 'series' },
+      name: s.name, type: 'line', data: s.values,
+      smooth: false, symbol: 'circle', symbolSize: 3,
+      lineStyle: { width: 1.5 },
+      emphasis: { focus: 'series', lineStyle: { width: 2.5 } },
       connectNulls: false,
     })),
   };
@@ -453,7 +654,6 @@ async function fetchAndRender() {
   chart.setOption(option, true);
 }
 
-// Helpers to get display labels on the client side
 function metricLabel(m) {
   if (!meta) return m;
   const found = meta.metrics.find(x => x.value === m);
@@ -471,21 +671,17 @@ async function init() {
 
   populateSelect(selMetric, meta.metrics);
   populateSelect(selType, meta.types);
-
   updateAdderVisibility();
 
-  // Wire up adder controls
   selAddLevel.addEventListener('change', updateAdderVisibility);
   selAddCounty.addEventListener('change', () => {
     if (selAddLevel.value === 'municipality') updateAddMunicipalities();
   });
   addBtn.addEventListener('click', handleAdd);
 
-  // Re-fetch when metric or type changes (applies to all entities)
   selMetric.addEventListener('change', fetchAndRender);
   selType.addEventListener('change', fetchAndRender);
 
-  // Download chart as PNG
   downloadBtn.addEventListener('click', () => {
     const url = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
     const a = document.createElement('a');
@@ -494,14 +690,12 @@ async function init() {
     a.click();
   });
 
-  // Info modal
   infoBtn.addEventListener('click', () => infoModal.classList.add('open'));
   modalClose.addEventListener('click', () => infoModal.classList.remove('open'));
   infoModal.addEventListener('click', (ev) => {
     if (ev.target === infoModal) infoModal.classList.remove('open');
   });
 
-  // Pre-select STATEWIDE
   addEntity('state', '', '');
 }
 
