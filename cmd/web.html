@@ -491,6 +491,39 @@ function clearAll() {
   fetchAndRender();
 }
 
+function updateURL() {
+  const params = new URLSearchParams();
+  params.set('metric', selMetric.value);
+  params.set('type', selType.value);
+  for (const e of entities) params.append('e', e.key);
+  history.replaceState(null, '', '?' + params.toString());
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const metric = params.get('metric');
+  const type = params.get('type');
+  const keys = params.getAll('e');
+
+  if (metric) selMetric.value = metric;
+  if (type) selType.value = type;
+
+  if (keys.length > 0) {
+    for (const key of keys) {
+      const [level, county, municipality] = key.split(':');
+      if (!level) continue;
+      const label = entityLabel(level, county || '', municipality || '');
+      if (!entities.some(e => e.key === key)) {
+        entities.push({ level, county: county || '', municipality: municipality || '', label, key });
+      }
+    }
+    renderChips();
+    fetchAndRender();
+  } else {
+    addEntity('state', '', '');
+  }
+}
+
 function renderChips() {
   chipsEl.innerHTML = '';
   for (const e of entities) {
@@ -547,6 +580,7 @@ async function fetchAndRender() {
       },
       xAxis: { show: false }, yAxis: { show: false }, series: [],
     }, true);
+    updateURL();
     return;
   }
 
@@ -625,7 +659,7 @@ async function fetchAndRender() {
       itemWidth: 16, itemHeight: 2,
       itemGap: 16,
     },
-    grid: { left: 72, right: 32, top: 48, bottom: 56 },
+    grid: { left: 72, right: 32, top: 48, bottom: 80 },
     xAxis: {
       type: 'category', data: mergedDates,
       axisLabel: { rotate: 45, fontSize: 10, color: '#78716c',
@@ -652,6 +686,7 @@ async function fetchAndRender() {
   };
 
   chart.setOption(option, true);
+  updateURL();
 }
 
 function metricLabel(m) {
@@ -696,7 +731,7 @@ async function init() {
     if (ev.target === infoModal) infoModal.classList.remove('open');
   });
 
-  addEntity('state', '', '');
+  loadFromURL();
 }
 
 init();
