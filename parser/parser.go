@@ -254,6 +254,16 @@ func ParsePage(items []string) (MunicipalityStats, error) {
 	if err != nil {
 		return stats, fmt.Errorf("reading municipality: %w", err)
 	}
+	// Some PDFs (observed 2026-06, 2026-09) place the municipality name at
+	// the same Tm y-position as the first column-header row, so our line
+	// grouping merges them. "D.P." is the first token of the header row;
+	// if it appears, everything from it on is header text to discard.
+	for i, s := range muniLine {
+		if strings.HasPrefix(s, "D.P.") {
+			muniLine = muniLine[:i]
+			break
+		}
+	}
 	stats.Municipality = joinClippedText(muniLine)
 
 	// Skip column header lines until we find a section name line.
