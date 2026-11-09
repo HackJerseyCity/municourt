@@ -12,6 +12,8 @@ import (
 
 var hrefPattern = regexp.MustCompile(`href="([^"]*munm(\d{4})\.pdf)"`)
 
+const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
 // Download implements the "download" subcommand: scrape the NJ Courts
 // statistics page for municipal court PDFs and download them.
 func Download(args []string) {
@@ -36,7 +38,7 @@ func Download(args []string) {
 		fmt.Fprintf(os.Stderr, "error creating request: %v\n", err)
 		os.Exit(1)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; municourt/1.0)")
+	req.Header.Set("User-Agent", userAgent)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -96,7 +98,7 @@ func downloadFile(url, dest string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; municourt/1.0)")
+	req.Header.Set("User-Agent", userAgent)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
